@@ -9,12 +9,31 @@ function App() {
   useEffect(() => {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const today = new Date().getDay();
-    setCurrentDay(` it's ${days[today]} Set your Goals ⚛⚛`);
+    setCurrentDay(`It's ${days[today]} - Set your Goals ⚛⚛`);
   }, []);
 
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(toDos));
   }, [toDos]);
+
+  const addTodo = () => {
+    if (ToDo.trim() !== '') {
+      setToDos([{ id: Date.now(), text: ToDo, status: false }, ...toDos]);
+      setToDo('');
+    }
+  };
+
+  const toggleTodoStatus = (id) => {
+    setToDos(prevToDos =>
+      prevToDos.map(todo =>
+        todo.id === id ? { ...todo, status: !todo.status } : todo
+      )
+    );
+  };
+
+  const removeTodo = (id) => {
+    setToDos(prevToDos => prevToDos.filter(todo => todo.id !== id));
+  };
 
   return (
     <div className="app">
@@ -26,54 +45,38 @@ function App() {
         <h2>{currentDay}</h2>
       </div>
       <div className="input">
-        <input 
-          value={ToDo} 
-          onChange={(event) => setToDo(event.target.value)} 
-          type="text" 
-          placeholder="🖊️ Add item..." 
+        <input
+          value={ToDo}
+          onChange={(event) => setToDo(event.target.value)}
+          type="text"
+          placeholder="🖊️ Add item..."
         />
-        <i 
-          onClick={() => setToDos([{id: Date.now(), text: ToDo, status: false}, ...toDos])} 
-          className="fas fa-plus"
-        ></i>
+        <i onClick={addTodo} className="fas fa-plus"></i>
       </div>
       <div className="todos">
-        {toDos.map((TODO, index) => {
-          return (
-            <div className="todo" key={TODO.id}>
-              <div className="left">
-                <input 
-                  onChange={(e) => {
-                    setToDos(prevToDos => prevToDos.map(obj => {
-                      if (obj.id === TODO.id) {
-                        obj.status = e.target.checked;
-                      }
-                      return obj;
-                    }));
-                  }}
-                  value={TODO.status}
+        {toDos.map((todo) => (
+          <div className="todo" key={todo.id}>
+            <div className="left">
+              <label className="checkboxContainer">
+                <input
                   type="checkbox"
-                  checked={TODO.status}
-                  name=""
-                  id=""
+                  checked={todo.status}
+                  onChange={() => toggleTodoStatus(todo.id)}
                 />
-                <p style={{ textDecoration: TODO.status ? 'line-through' : 'none' }}>{TODO.text}</p>
-              </div>
-              <div className="right">
-                {TODO.status ? (
-                  <i className="fas fa-check" style={{ color: 'green' }}></i>
-                ) : (
-                  <i 
-                    className="fas fa-times"
-                    onClick={() => {
-                      setToDos(prevToDos => prevToDos.filter(obj => obj.id !== TODO.id));
-                    }}
-                  ></i>
-                )}
-              </div>
+                <span className="checkmark"></span>
+              </label>
+              <p style={{ textDecoration: todo.status ? 'line-through' : 'none' }}>
+                {todo.text}
+              </p>
             </div>
-          );
-        })}
+            <div className="right">
+              <i
+                className="fas fa-times"
+                onClick={() => removeTodo(todo.id)}
+              ></i>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
